@@ -20,7 +20,8 @@ encoders = ewas_dict.get('encoders', {})
 feature_columns = ewas_dict.get('feature_columns', [])
 
 portfolio_df = pd.read_csv('portfolio_summary.csv')
-clean_features_df = pd.read_csv('clean_features.csv') if os.path.exists('clean_features.csv') else None
+# UPDATED: Reading from the compressed ZIP file to bypass GitHub limits
+clean_features_df = pd.read_csv('clean_features.zip', compression='zip') if os.path.exists('clean_features.zip') else None
 
 # Dual SHAP Explainer Initialization for both targets
 explainer_cost = shap.TreeExplainer(models['Cost_Overrun_Pct']['model_b'])
@@ -160,7 +161,12 @@ def ledger():
 
 @app.route('/scenario')
 def scenario():
-    df = pd.read_csv('clean_features.csv')
+    # UPDATED: Reading from the compressed ZIP file to bypass GitHub limits
+    if os.path.exists('clean_features.zip'):
+        df = pd.read_csv('clean_features.zip', compression='zip')
+    else:
+        df = pd.DataFrame({'Sector': [], 'Implementing_Agency': []})
+        
     sectors = sorted([str(x) for x in df['Sector'].unique() if str(x).upper() not in ['UNKNOWN', 'NAN']])
     agencies = sorted([str(x) for x in df['Implementing_Agency'].unique() if str(x).upper() not in ['UNKNOWN', 'NAN']])
     return render_template('scenario.html', active_page='scenario', sectors=sectors, agencies=agencies)
