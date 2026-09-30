@@ -1,3 +1,4 @@
+
 # PAIMANA: AI-Driven Infrastructure Early Warning System 🚀
 
 **PAIMANA** is an executive-level Early Warning System (EWS) designed to monitor, predict, and explain cost overruns and time delays in large-scale infrastructure projects. Powered by an ensemble of gradient-boosted trees and explainable AI (SHAP), it provides decision-makers with real-time risk intelligence.
@@ -19,19 +20,21 @@
 
 ## 📂 Repository Structure
 
-\`\`\`text
-├── templates/                 # HTML UI components (Base, Dashboard, Ledger, Scenario, Co-Pilot)
-├── ewas_model.pkl             # Trained XGBoost/LightGBM ensemble and encoders
-├── clean_features.zip         # Compressed raw feature matrix (zipped to bypass 100MB limits)
-├── portfolio_summary.csv      # Lightweight cached dataset for fast UI rendering
-├── requirements.txt           # Python dependencies for deployment
-├── server.py                  # Main Flask application and API routing
-└── README.md                  # Project documentation
-\`\`\`
+```text
+├── templates/               # HTML UI components (Base, Dashboard, Ledger, Scenario, Co-Pilot)
+├── ewas_model.pkl           # Trained XGBoost/LightGBM ensemble and encoders
+├── clean_features.zip       # Compressed raw feature matrix (zipped to bypass 100MB limits)
+├── portfolio_summary.csv    # Lightweight cached dataset for fast UI rendering
+├── requirements.txt         # Python dependencies for deployment
+├── server.py                # Main Flask application and API routing
+└── README.md                # Project documentation
+
+```
 
 ## 🚀 Live Deployment (Render)
 
-This application is optimized for free deployment on [Render](https://render.com/). 
+This application is optimized for free deployment on [Render](https://render.com/).
+
 1. Connect this repository to a new Render **Web Service**.
 2. Set the Build Command to: `pip install -r requirements.txt`
 3. Set the Start Command to: `gunicorn server:app`
@@ -42,23 +45,28 @@ This application is optimized for free deployment on [Render](https://render.com
 To run this project on your local machine:
 
 1. **Clone the repository:**
-   \`\`\`bash
-   git clone https://github.com/Bhojrajsahu07/SIH-2026.git 
-   cd SIH-2026
-   \`\`\`
+```bash
+git clone [https://github.com/Bhojrajsahu07/SIH-2026.git](https://github.com/Bhojrajsahu07/SIH-2026.git)
+cd SIH-2026
+
+```
+
 
 2. **Install the required dependencies:**
-   \`\`\`bash
-   pip install -r requirements.txt
-   \`\`\`
+```bash
+pip install -r requirements.txt
+
+```
+
 
 3. **Boot the Flask server:**
-   \`\`\`bash
-   python server.py
-   \`\`\`
+```bash
+python server.py
+
+```
+
 
 4. **Access the application:**
-   Open your web browser and navigate to `http://localhost:5000`.
+Open your web browser and navigate to `http://localhost:5000`.
 
 ---
-*Developed for intelligent infrastructure monitoring and risk mitigation.*
