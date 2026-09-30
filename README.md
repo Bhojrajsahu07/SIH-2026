@@ -43,8 +43,8 @@ To run this project on your local machine:
 
 1. **Clone the repository:**
    \`\`\`bash
-   git clone [https://github.com/Bhojrajsahu07/SIH-2026.git]
-   cd YOUR-REPO-NAME
+   git clone https://github.com/Bhojrajsahu07/SIH-2026.git 
+   cd SIH-2026
    \`\`\`
 
 2. **Install the required dependencies:**
