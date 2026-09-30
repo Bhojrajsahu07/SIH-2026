@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="mb-8">
+    <h2 class="text-3xl font-bold text-white tracking-tight">National Infrastructure Telemetry</h2>
+    <p class="text-slate-400 mt-2">Real-time risk aggregation across central sector portfolios.</p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass-panel p-6">
+        <div class="flex justify-between items-start mb-4">
+            <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Active Projects Tracked</h4>
+            <i class="ph ph-projector-screen-chart text-2xl text-[#1e3a8a]"></i>
+        </div>
+        <h2 class="text-4xl font-bold text-white">{{ kpis.total }}</h2>
+    </div>
+    <div class="glass-panel p-6 relative overflow-hidden">
+        <div class="flex justify-between items-start mb-4 relative z-10">
+            <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Critical Flags</h4>
+            <i class="ph ph-warning-circle text-2xl text-red-500"></i>
+        </div>
+        <h2 class="text-4xl font-bold text-red-500 relative z-10">{{ kpis.critical }}</h2>
+    </div>
+    <div class="glass-panel p-6">
+        <div class="flex justify-between items-start mb-4">
+            <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Sanctioned Budget</h4>
+            <i class="ph ph-currency-inr text-2xl text-emerald-600"></i>
+        </div>
+        <h2 class="text-4xl font-bold text-white">₹{{ kpis.cost }} L Cr</h2>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="glass-panel p-6 h-[400px] flex flex-col">
+        <h3 class="text-lg font-semibold mb-4 text-white border-b border-slate-700/50 pb-2">Average Timeline Slippage (Months)</h3>
+        <div id="chart-sector" class="flex-1 w-full"></div>
+    </div>
+    <div class="glass-panel p-6 h-[400px] flex flex-col">
+        <h3 class="text-lg font-semibold mb-4 text-white border-b border-slate-700/50 pb-2">Project Volume by State</h3>
+        <div id="chart-state" class="flex-1 w-full"></div>
+    </div>
+</div>
+
+<script>
+    function renderCharts() {
+        const isLight = document.body.classList.contains('light-mode');
+        const textColor = isLight ? '#475569' : '#94a3b8';
+        const gridColor = isLight ? '#e2e8f0' : '#334155';
+        
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', 
+            font: { color: textColor, family: 'Inter', size: 11 },
+            margin: { t: 10, l: 140, r: 20, b: 30 },
+            xaxis: { gridcolor: gridColor }, yaxis: { gridcolor: gridColor }
+        };
+
+        // Sector Chart (Royal Blue)
+        const sectors = {{ sectors | tojson }};
+        const delays = {{ delays | tojson }};
+        Plotly.newPlot('chart-sector', [{ 
+            type: 'bar', x: delays, y: sectors, orientation: 'h', 
+            marker: { color: '#1e3a8a', borderRadius: 4 } 
+        }], layout, {displayModeBar: false});
+
+        // State Volume Chart (Red)
+        const states = {{ states | tojson }};
+        const counts = {{ counts | tojson }};
+        Plotly.newPlot('chart-state', [{ 
+            type: 'bar', x: counts, y: states, orientation: 'h', 
+            marker: { color: '#ef4444', borderRadius: 4 } 
+        }], layout, {displayModeBar: false});
+    }
+
+    // Render initially
+    renderCharts();
+
+    // Re-render when theme button is clicked (attach to the existing button in base.html)
+    document.getElementById('theme-btn').addEventListener('click', () => {
+        setTimeout(renderCharts, 50); // slight delay to let CSS class apply
+    });
+</script>
+{% endblock %}

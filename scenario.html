@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="mb-8"><h2 class="text-3xl font-bold text-white tracking-tight">Explainable AI Scenario Lab</h2></header>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="glass-panel p-6">
+        <h3 class="text-lg font-bold text-white mb-6">Project Parameters</h3>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div><label class="block text-xs text-slate-400 mb-1">SECTOR</label>
+                <select id="sector" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2">
+                    {% for s in sectors %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                    <option value="UNKNOWN">UNKNOWN</option>
+                </select>
+            </div>
+            <div><label class="block text-xs text-slate-400 mb-1">AGENCY</label>
+                <select id="agency" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2">
+                    {% for a in agencies %}
+                    <option value="{{ a }}">{{ a[:40] }}</option>
+                    {% endfor %}
+                    <option value="UNKNOWN">UNKNOWN</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div><label class="block text-xs text-slate-400 mb-1">APPROVAL DATE</label>
+                <input type="month" id="app_date" value="2020-01" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2">
+            </div>
+            <div><label class="block text-xs text-slate-400 mb-1">TARGET DATE</label>
+                <input type="month" id="tgt_date" value="2024-01" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2">
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="block text-xs text-slate-400 mb-1">REPORT DATE</label>
+            <input type="month" id="rpt_date" value="2024-06" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2">
+        </div>
+        <div class="mb-4">
+            <label class="block text-xs text-slate-400 mb-1">ORIGINAL COST (CR): <span id="val_cost">1000</span></label>
+            <input type="range" id="orig_cost" min="10" max="10000" value="1000" class="w-full" oninput="document.getElementById('val_cost').innerText=this.value">
+        </div>
+        <div class="mb-4">
+            <label class="block text-xs text-slate-400 mb-1">CUMULATIVE EXPENDITURE (CR): <span id="val_exp">500</span></label>
+            <input type="range" id="cum_exp" min="0" max="10000" value="500" class="w-full" oninput="document.getElementById('val_exp').innerText=this.value">
+        </div>
+        <div class="mb-8">
+            <label class="block text-xs text-slate-400 mb-1">PHYSICAL PROGRESS (%): <span id="val_prog">45</span></label>
+            <input type="range" id="phys_prog" min="0" max="100" value="45" class="w-full" oninput="document.getElementById('val_prog').innerText=this.value">
+        </div>
+        <button id="analyzeBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors">Analyze Risk</button>
+    </div>
+    
+    <div>
+        <!-- Main Tiers -->
+        <div class="glass-panel p-6 mb-6 text-center">
+            <h3 class="text-xs text-slate-400 uppercase tracking-widest mb-2">System Risk Tier</h3>
+            <div id="res_tier" class="text-5xl font-bold text-slate-600">STANDBY</div>
+        </div>
+        <div class="grid grid-cols-2 gap-6 mb-6">
+            <div class="glass-panel p-6 text-center"><h3 class="text-xs text-slate-400 uppercase mb-2">Cost Overrun</h3><div id="res_cost" class="text-3xl font-bold text-white">-- %</div></div>
+            <div class="glass-panel p-6 text-center"><h3 class="text-xs text-slate-400 uppercase mb-2">Time Delay</h3><div id="res_time" class="text-3xl font-bold text-white">-- Mos</div></div>
+        </div>
+
+        <!-- XAI Diagnostics Panel -->
+        <div class="glass-panel p-6 mb-6">
+            <h3 class="text-xs text-slate-400 uppercase tracking-widest mb-4">XAI Diagnostics (SHAP)</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h4 class="text-[10px] text-slate-500 uppercase mb-2 border-b border-slate-700 pb-1">Cost Drivers</h4>
+                    <div id="xai_cost_list" class="space-y-1 text-xs text-slate-400">Awaiting Analysis...</div>
+                </div>
+                <div>
+                    <h4 class="text-[10px] text-slate-500 uppercase mb-2 border-b border-slate-700 pb-1">Time Drivers</h4>
+                    <div id="xai_time_list" class="space-y-1 text-xs text-slate-400">Awaiting Analysis...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function renderXAI(containerId, drivers, unit) {
+    let html = '';
+    drivers.forEach(d => {
+        let color = d.impact > 0 ? 'text-red-400' : 'text-green-400';
+        let sign = d.impact > 0 ? '+' : '';
+        html += `<div class="flex justify-between items-center bg-slate-800/50 rounded px-2 py-1">
+            <span class="truncate pr-2">${d.feature.replace(/_/g, ' ')}</span>
+            <span class="${color} font-mono font-bold">${sign}${d.impact} ${unit}</span>
+        </div>`;
+    });
+    document.getElementById(containerId).innerHTML = html;
+}
+
+document.getElementById('analyzeBtn').addEventListener('click', async () => {
+    const payload = {
+        Sector: document.getElementById('sector').value,
+        Implementing_Agency: document.getElementById('agency').value,
+        Approval_Date: document.getElementById('app_date').value,
+        Target_Date: document.getElementById('tgt_date').value,
+        Report_Date: document.getElementById('rpt_date').value,
+        Original_Cost: document.getElementById('orig_cost').value,
+        Cumulative_Expenditure: document.getElementById('cum_exp').value,
+        Physical_Progress_Pct: document.getElementById('phys_prog').value
+    };
+    
+    const btn = document.getElementById('analyzeBtn'); btn.innerText = "Analyzing...";
+    const res = await fetch('/api/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+    const data = await res.json();
+    btn.innerText = "Analyze Risk";
+    
+    document.getElementById('res_cost').innerText = data.Final_Cost_Overrun + " %";
+    document.getElementById('res_time').innerText = data.Final_Time_Delay + " Mos";
+    
+    let tierEl = document.getElementById('res_tier');
+    tierEl.innerText = data.Risk_Tier.toUpperCase();
+    tierEl.className = "text-5xl font-bold " + (data.Risk_Tier === 'Critical' ? 'text-red-500' : data.Risk_Tier === 'High' ? 'text-orange-500' : data.Risk_Tier === 'Medium' ? 'text-yellow-500' : 'text-green-500');
+
+    // Populate SHAP Drivers
+    renderXAI('xai_cost_list', data.Top_Cost_Drivers, '%');
+    renderXAI('xai_time_list', data.Top_Time_Drivers, 'Mos');
+});
+</script>
+{% endblock %}

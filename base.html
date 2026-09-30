@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAIMANA | Executive EWS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; }
+        
+        /* Nav Links */
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; font-weight: 500; transition: all 0.2s ease; color: #94a3b8; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.05); color: #f8fafc; }
+        /* Authoritative Royal/Navy Blue instead of AI Purple */
+        .nav-link.active { background: #1e3a8a; color: white; box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3); }
+        
+        /* Badges */
+        .badge-crit { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-high { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-med { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-low { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        /* =========================================
+           LIGHT MODE OVERRIDES 
+           ========================================= */
+        body.light-mode { background-color: #f8fafc; color: #0f172a; }
+        body.light-mode .glass-panel { background: rgba(255, 255, 255, 0.95); border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        body.light-mode .text-white { color: #0f172a !important; }
+        body.light-mode .text-slate-400 { color: #475569 !important; }
+        body.light-mode .text-slate-300 { color: #334155 !important; }
+        body.light-mode .bg-slate-800\/50, body.light-mode .bg-slate-800\/80, body.light-mode .bg-slate-900 { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        body.light-mode .divide-slate-700\/50 > :not([hidden]) ~ :not([hidden]) { border-color: #e2e8f0 !important; }
+        body.light-mode .border-slate-700, body.light-mode .border-slate-700\/50 { border-color: #cbd5e1 !important; }
+        body.light-mode .nav-link { color: #475569; }
+        body.light-mode .nav-link:hover { background: #e2e8f0; color: #0f172a;}
+        body.light-mode .nav-link.active { color: white !important; }
+        body.light-mode input { color: #0f172a !important; }
+        body.light-mode #riskGlow { display: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden pt-1.5">
+    <!-- Immediate Theme Check to Prevent Flickering -->
+    <script>
+        if (localStorage.getItem('paimana_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+    </script>
+
+    <!-- Indian Flag Official Top Border -->
+    <div class="h-1.5 w-full fixed top-0 left-0 z-50 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"></div>
+
+    <!-- Theme Toggle (Top Right) -->
+    <div class="absolute top-6 right-8 z-50">
+        <button onclick="toggleTheme()" class="p-2.5 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 transition-colors shadow-lg flex items-center justify-center" id="theme-btn">
+            <i class="ph ph-sun text-xl" id="theme-icon"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-72 glass-panel m-4 flex flex-col p-6 z-20">
+        <!-- National Emblem & Title -->
+        <div class="flex items-center gap-3 mb-10">
+            <div class="bg-white rounded-md p-1.5 flex-shrink-0 w-12 h-14 flex items-center justify-center">
+                <!-- Using raw SVG to avoid thumbnail rendering issues -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem of India" class="w-full h-full object-contain" onerror="this.style.display='none'; document.getElementById('emblem-fallback').style.display='block';">
+                <i class="ph ph-shield-check text-2xl text-blue-900 hidden" id="emblem-fallback"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wider text-white leading-tight">PAIMANA</h1>
+                <p class="text-[11px] text-[#1e3a8a] font-bold uppercase tracking-widest">Executive EWS</p>
+            </div>
+        </div>
+        
+        <nav class="flex flex-col gap-3 flex-1">
+            <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                <i class="ph ph-squares-four text-xl"></i> Executive Dashboard
+            </a>
+            <a href="/ledger" class="nav-link {% if active_page == 'ledger' %}active{% endif %}">
+                <i class="ph ph-table text-xl"></i> Project Ledger
+            </a>
+            <a href="/scenario" class="nav-link {% if active_page == 'scenario' %}active{% endif %}">
+                <i class="ph ph-sliders text-xl"></i> Scenario Lab
+            </a>
+            <a href="/copilot" class="nav-link {% if active_page == 'copilot' %}active{% endif %}">
+                <i class="ph ph-robot text-xl"></i> AI Co-Pilot
+            </a>
+        </nav>
+
+        <!-- Status Box -->
+        <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 mt-auto">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
+                <span class="text-xs font-bold text-slate-300">ENGINE ONLINE</span>
+            </div>
+            <p class="text-[10px] text-slate-500 font-mono mt-1">production_paimana_engine</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 overflow-y-auto custom-scrollbar relative">
+        <div class="max-w-7xl mx-auto py-2">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Theme Toggle Logic -->
+    <script>
+        // Set initial icon state based on what was applied at page load
+        if (document.body.classList.contains('light-mode')) {
+            document.getElementById('theme-icon').className = 'ph ph-moon text-xl';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            
+            // Update Toggle Icon
+            document.getElementById('theme-icon').className = isLight ? 'ph ph-moon text-xl' : 'ph ph-sun text-xl';
+            
+            // Save preference
+            localStorage.setItem('paimana_theme', isLight ? 'light' : 'dark');
+            
+            // If Plotly charts exist, redraw them to fix font colors
+            if(typeof Plotly !== 'undefined') {
+                const textColor = isLight ? '#334155' : '#94a3b8';
+                const gridColor = isLight ? '#e2e8f0' : '#334155';
+                
+                const update = {
+                    'font.color': textColor,
+                    'xaxis.gridcolor': gridColor,
+                    'yaxis.gridcolor': gridColor
+                };
+                
+                const charts = ['chart-sector', 'chart-map'];
+                charts.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) { Plotly.relayout(el, update); }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

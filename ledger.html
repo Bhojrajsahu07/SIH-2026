@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="mb-8"><h2 class="text-3xl font-bold text-white tracking-tight">Project Drilldown Ledger</h2></header>
+<div class="glass-panel p-6">
+    <div class="flex justify-between items-center mb-6">
+        <div class="relative w-72">
+            <input type="text" id="searchInput" placeholder="Search projects, sectors, states..." class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-lg pl-4 pr-4 py-2 focus:border-blue-500 transition-colors">
+        </div>
+        <button id="exportBtn" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Export CSV</button>
+    </div>
+    <div class="overflow-x-auto rounded-lg border border-slate-700/50">
+        <table id="ledgerTable" class="w-full text-sm text-left">
+            <thead class="text-xs text-slate-400 bg-slate-800/80 uppercase border-b border-slate-700/50">
+                <tr><th class="px-6 py-4">Project</th><th class="px-6 py-4">State</th><th class="px-6 py-4 text-right">Budget</th><th class="px-6 py-4 text-center">Delay</th><th class="px-6 py-4 text-center">Risk</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700/50">
+                {% for p in projects %}
+                <tr class="hover:bg-slate-800/30">
+                    <td class="px-6 py-4 text-white">{{ (p.get('Project_Name', p.get('Project_ID', 'Unknown')) | string)[:45] }}</td>
+                    <td class="px-6 py-4 text-slate-400">{{ p.get('State_Location', 'Unknown') }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-slate-300">₹{{ p.get('Original_Cost', '0') }}</td>
+                    <td class="px-6 py-4 text-center font-mono text-slate-300">{{ p.get('Predicted_Delay_Months', '0') }}m</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if p.get('Risk_Tier') == 'Critical' %}<span class="text-red-500 font-bold">Critical</span>
+                        {% elif p.get('Risk_Tier') == 'High' %}<span class="text-orange-500 font-bold">High</span>
+                        {% elif p.get('Risk_Tier') == 'Medium' %}<span class="text-yellow-500 font-bold">Medium</span>
+                        {% else %}<span class="text-green-500 font-bold">Low</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#ledgerTable tbody tr');
+    rows.forEach(row => row.style.display = row.innerText.toLowerCase().includes(filter) ? '' : 'none');
+});
+document.getElementById('exportBtn').addEventListener('click', function() {
+    let csv = [];
+    let rows = document.querySelectorAll('#ledgerTable tr');
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+            let text = cols[j].innerText.replace(/"/g, '""').trim();
+            row.push('"' + text + '"');
+        }
+        if (row.length > 0 && rows[i].style.display !== 'none') csv.push(row.join(','));
+    }
+    let link = document.createElement('a');
+    link.download = 'project_ledger.csv';
+    // Fixed: Using standard carriage returns so Excel maps the rows perfectly
+    let blob = new Blob([csv.join('\r\n')], {type: 'text/csv;charset=utf-8;'});
+    link.href = window.URL.createObjectURL(blob);
+    link.click();
+});
+</script>
+{% endblock %}

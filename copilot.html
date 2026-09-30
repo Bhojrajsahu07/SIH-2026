@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            <i class="ph ph-cpu text-blue-500"></i> AI Co-Pilot & Neural Analytics
+        </h2>
+        <p class="text-slate-400 mt-1">Autonomous Early Warning Intelligence, RAG Retrieval & SHAP Diagnostics.</p>
+    </div>
+    <div class="flex items-center gap-3 bg-slate-800/80 border border-slate-700/60 px-4 py-2 rounded-xl text-xs text-slate-300">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>RAG Pipeline: <b>Active</b></span>
+        <span class="text-slate-600">|</span>
+        <span>SHAP Engine: <b>TreeExplainer</b></span>
+    </div>
+</header>
+
+<div class="flex flex-wrap gap-2 mb-4">
+    <button onclick="sendQuickPrompt('Show top 5 Critical risk projects across all states')" class="bg-slate-800/60 hover:bg-blue-600/20 border border-slate-700/80 hover:border-blue-500/50 text-slate-300 hover:text-blue-400 text-xs px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+        <i class="ph ph-warning-circle text-amber-400"></i> Top Critical Risk Projects
+    </button>
+    <button onclick="sendQuickPrompt('Explain SHAP risk drivers for project N04000050')" class="bg-slate-800/60 hover:bg-blue-600/20 border border-slate-700/80 hover:border-blue-500/50 text-slate-300 hover:text-blue-400 text-xs px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+        <i class="ph ph-chart-bar-horizontal text-blue-400"></i> SHAP Feature Impact
+    </button>
+    <button onclick="sendQuickPrompt('Analyze budget vs delay bottlenecks in Bihar and Sikkim')" class="bg-slate-800/60 hover:bg-blue-600/20 border border-slate-700/80 hover:border-blue-500/50 text-slate-300 hover:text-blue-400 text-xs px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+        <i class="ph ph-map-pin text-emerald-400"></i> Regional Bottlenecks
+    </button>
+</div>
+
+<div class="glass-panel flex flex-col h-[68vh] overflow-hidden border border-slate-700/60 rounded-2xl shadow-2xl bg-slate-900/90 backdrop-blur-md">
+    <div id="chat-messages" class="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-5">
+        <div class="flex gap-4 max-w-4xl">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
+                <i class="ph ph-robot text-white text-xl"></i>
+            </div>
+            <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl rounded-tl-sm p-5 text-slate-200 text-sm leading-relaxed shadow-lg">
+                <div class="font-semibold text-blue-400 mb-1 flex items-center gap-2">
+                    <i class="ph ph-sparkle"></i> PAIMANA Intelligence Engine v2.4 Online
+                </div>
+                <!-- FIX 1: Replaced markdown asterisks with HTML bold tags -->
+                Welcome, Officer. I am equipped with <b>RAG semantic database indexing</b> and <b>SHAP explainable AI drivers</b>. Query any state, project ID, risk cluster, or sector bottleneck to run realtime predictive diagnostics.
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4 border-t border-slate-800 bg-slate-950/60">
+        <form onsubmit="handleSend(event)" class="relative flex items-center">
+            <input type="text" id="chat-input" placeholder="Ask PAIMANA Co-Pilot (e.g. 'Show critical road projects in Bihar', 'SHAP for N04000050')..." class="w-full bg-slate-900/90 border border-slate-700/80 text-white rounded-xl pl-4 pr-14 py-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm placeholder:text-slate-500" autocomplete="off" required />
+            <!-- FIX 2: Added fixed w-10 h-10 dimensions and an explicit SVG to guarantee the send button renders -->
+            <button type="submit" class="absolute right-2 w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg text-white shadow-md transition-all flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256"><path d="M227.32,28.68a16,16,0,0,0-15.66-4.08l-192,64a16,16,0,0,0-2.42,29.84l85.62,40.55,40.55,85.62A15.86,15.86,0,0,0,157.74,256q.69,0,1.38-.06a15.88,15.88,0,0,0,14-11.51l64-192A16,16,0,0,0,227.32,28.68ZM157.83,231.85l-35.46-74.9L173.66,105.66a8,8,0,0,0-11.32-11.32L111.05,145.63,36.15,110.17l176.9-59Z"></path></svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function sendQuickPrompt(promptText) {
+    document.getElementById('chat-input').value = promptText;
+    document.forms[0].dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+}
+
+async function handleSend(event) {
+    event.preventDefault();
+    const inputEl = document.getElementById('chat-input');
+    const container = document.getElementById('chat-messages');
+    const userQuery = inputEl.value.trim();
+
+    if (!userQuery) return;
+
+    const userMessageHtml = `
+        <div class="flex gap-3 max-w-3xl ml-auto flex-row-reverse">
+            <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
+                <i class="ph ph-user text-slate-300 text-lg"></i>
+            </div>
+            <div class="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed shadow-lg">
+                ${escapeHtml(userQuery)}
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', userMessageHtml);
+    inputEl.value = '';
+
+    const loadingId = 'loading-' + Date.now();
+    const loadingHtml = `
+        <div id="${loadingId}" class="flex gap-4 max-w-4xl">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center flex-shrink-0 animate-pulse">
+                <i class="ph ph-cpu text-white text-xl"></i>
+            </div>
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl rounded-tl-sm p-4 text-slate-400 text-sm flex items-center gap-3">
+                <svg class="animate-spin h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Evaluating RAG vector indices & calculating SHAP tree interactions...</span>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', loadingHtml);
+    container.scrollTop = container.scrollHeight;
+
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: userQuery })
+        });
+        
+        const data = await res.json();
+        const loadingElement = document.getElementById(loadingId);
+        
+        if (loadingElement) {
+            loadingElement.innerHTML = `
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
+                    <i class="ph ph-robot text-white text-xl"></i>
+                </div>
+                <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl rounded-tl-sm p-5 text-slate-200 text-sm leading-relaxed shadow-xl w-full">
+                    ${data.response_html || data.response}
+                </div>
+            `;
+        }
+    } catch (err) {
+        const loadingElement = document.getElementById(loadingId);
+        if (loadingElement) {
+            loadingElement.innerHTML = `
+                <div class="w-10 h-10 rounded-xl bg-rose-600 flex items-center justify-center flex-shrink-0">
+                    <i class="ph ph-warning-circle text-white text-xl"></i>
+                </div>
+                <div class="bg-slate-800/90 border border-rose-500/30 rounded-2xl rounded-tl-sm p-4 text-rose-300 text-sm">
+                    Execution error communicating with server.py engine.
+                </div>
+            `;
+        }
+    }
+    container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+</script>
+{% endblock %}
