@@ -43,7 +43,7 @@ To run this project on your local machine:
 
 1. **Clone the repository:**
    \`\`\`bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
+   git clone [https://github.com/Bhojrajsahu07/SIH-2026.git]
    cd YOUR-REPO-NAME
    \`\`\`
 
