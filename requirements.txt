@@ -1,8 +1,8 @@
 Flask==3.0.0
-pandas==2.1.1
-numpy==1.26.0
-scikit-learn==1.3.1
-xgboost==2.0.0
-lightgbm==4.1.0
-shap==0.43.0
-gunicorn==21.2.0
+pandas
+numpy>=2.0.0
+scikit-learn
+xgboost
+lightgbm
+shap
+gunicorn
